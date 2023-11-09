@@ -4,53 +4,9 @@
       <div class="content__wrapper">
         <h1 class="title title--big">Конструктор пиццы</h1>
 
-        <div class="content__dough">
-          <div class="sheet">
-            <h2 class="title title--small sheet__title">Выберите тесто</h2>
+        <dough-selector v-model="pizza.dough" :items="doughItems" />
 
-            <div class="sheet__content dough">
-              <label
-                v-for="doughType in doughItems"
-                :key="doughType.id"
-                :class="`dough__input dough__input--${doughType.value}`"
-              >
-                <input
-                  type="radio"
-                  name="dought"
-                  :value="doughType.value"
-                  class="visually-hidden"
-                  :checked="doughType.value === 'light'"
-                />
-                <!-- <img :src="getImage(doughType.image)" :alt="doughType.name" /> -->
-                <b>{{ doughType.name }}</b>
-                <span>{{ doughType.description }}</span>
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <div class="content__diameter">
-          <div class="sheet">
-            <h2 class="title title--small sheet__title">Выберите размер</h2>
-
-            <div class="sheet__content diameter">
-              <label
-                v-for="sizeType in sizeItems"
-                :key="sizeType.id"
-                :class="`diameter__input diameter__input--${sizeType.value}`"
-              >
-                <input
-                  type="radio"
-                  name="diameter"
-                  :value="sizeType.value"
-                  class="visually-hidden"
-                  :checked="sizeType.value === 'normal'"
-                />
-                <span>{{ sizeType.name }}</span>
-              </label>
-            </div>
-          </div>
-        </div>
+        <size-selector v-model="pizza.size" :items="sizeItems" />
 
         <div class="content__ingredients">
           <div class="sheet">
@@ -59,68 +15,12 @@
             </h2>
 
             <div class="sheet__content ingredients">
-              <div class="ingredients__sauce">
-                <p>Основной соус:</p>
-
-                <label
-                  v-for="sauceType in sauceItems"
-                  :key="sauceType.id"
-                  class="radio ingredients__input"
-                >
-                  <input
-                    type="radio"
-                    name="sauce"
-                    :value="sauceType.value"
-                    :checked="sauceType.value === 'tomato'"
-                  />
-                  <span>{{ sauceType.name }}</span>
-                </label>
-              </div>
-
-              <div class="ingredients__filling">
-                <p>Начинка:</p>
-
-                <ul class="ingredients__list">
-                  <li
-                    v-for="ingredientType in ingredientItems"
-                    :key="ingredientType.id"
-                    class="ingredients__item"
-                  >
-                    <!-- <div class="filling">
-                      <img
-                        :src="getImage(ingredientType.image)"
-                        :alt="ingredientType.name"
-                      />
-                      {{ ingredientType.name }}
-                    </div> -->
-                    <span :class="`filling filling--${ingredientType.value}`">{{
-                      ingredientType.name
-                    }}</span>
-
-                    <div class="counter counter--orange ingredients__counter">
-                      <button
-                        type="button"
-                        class="counter__button counter__button--minus"
-                        disabled
-                      >
-                        <span class="visually-hidden">Меньше</span>
-                      </button>
-                      <input
-                        type="text"
-                        name="counter"
-                        class="counter__input"
-                        value="0"
-                      />
-                      <button
-                        type="button"
-                        class="counter__button counter__button--plus"
-                      >
-                        <span class="visually-hidden">Больше</span>
-                      </button>
-                    </div>
-                  </li>
-                </ul>
-              </div>
+              <sauce-selector v-model="pizza.sauce" :items="sauceItems" />
+              <ingredients-selector
+                :items="ingredientItems"
+                :values="pizza.filling"
+                @update="updateIngredientAmount"
+              />
             </div>
           </div>
         </div>
@@ -129,25 +29,25 @@
           <label class="input">
             <span class="visually-hidden">Название пиццы</span>
             <input
+              v-model="pizza.name"
               type="text"
               name="pizza_name"
               placeholder="Введите название пиццы"
             />
           </label>
 
-          <div class="content__constructor">
-            <div class="pizza pizza--foundation--big-tomato">
-              <div class="pizza__wrapper">
-                <div class="pizza__filling pizza__filling--ananas"></div>
-                <div class="pizza__filling pizza__filling--bacon"></div>
-                <div class="pizza__filling pizza__filling--cheddar"></div>
-              </div>
-            </div>
-          </div>
+          <pizza-constructor
+            :dough="pizza.dough"
+            :sauce="pizza.sauce"
+            :filling="pizza.filling"
+            @drop="addIngredient"
+          />
 
           <div class="content__result">
-            <p>Итого: 0 ₽</p>
-            <button type="button" class="button" disabled>Готовьте!</button>
+            <p>Итого: {{ price }} ₽</p>
+            <button type="button" class="button" :disabled="disableSubmit">
+              Готовьте!
+            </button>
           </div>
         </div>
       </div>
@@ -156,6 +56,14 @@
 </template>
 
 <script setup>
+import { reactive, computed } from 'vue';
+
+import DoughSelector from '../modules/constructor/DoughSelector.vue';
+import SizeSelector from '../modules/constructor/SizeSelector.vue';
+import SauceSelector from '../modules/constructor/SauceSelector.vue';
+import IngredientsSelector from '../modules/constructor/IngredientsSelector.vue';
+import PizzaConstructor from '../modules/constructor/PizzaConstructor.vue';
+
 import {
   normalizeDough,
   normalizeIngredients,
@@ -165,7 +73,6 @@ import {
 
 import doughJSON from '@/mocks/dough.json';
 import ingredientsJSON from '@/mocks/ingredients.json';
-// import miscJSON from '@/mocks/misc.json';
 import saucesJSON from '@/mocks/sauces.json';
 import sizesJSON from '@/mocks/sizes.json';
 
@@ -174,12 +81,47 @@ const ingredientItems = ingredientsJSON.map(normalizeIngredients);
 const sauceItems = saucesJSON.map(normalizeSauces);
 const sizeItems = sizesJSON.map(normalizeSizes);
 
-// const getImage = (image) =>
-//   new URL(`../assets/img/${image}`, import.meta.url).href;
-// https://vitejs.dev/guide/assets.html#new-url-url-import-meta-url
+const pizza = reactive({
+  name: '',
+  dough: doughItems[0].value,
+  size: sizeItems[0].value,
+  sauce: sauceItems[0].value,
+  filling: ingredientItems.reduce((accumulator, item) => {
+    accumulator[item.value] = 0;
+    return accumulator;
+  }, {}),
+});
+
+const price = computed(() => {
+  const { dough, size, sauce, filling } = pizza;
+
+  const sizeMultiplier = sizeItems.find((i) => i.value === size).multiplier;
+
+  const doughPrice = doughItems.find((i) => i.value === dough).price;
+
+  const saucePrice = sauceItems.find((i) => i.value === sauce).price;
+
+  const fillingPrice = ingredientItems
+    .map((item) => filling[item.value] * item.price)
+    .reduce((acc, item) => acc + item, 0);
+
+  return sizeMultiplier * (doughPrice + saucePrice + fillingPrice);
+});
+
+const disableSubmit = computed(
+  () => pizza.name.length === 0 || pizza.price === 0
+);
+
+function updateIngredientAmount(ingredient, amount) {
+  pizza.filling[ingredient] = amount;
+}
+
+function addIngredient(ingredient) {
+  pizza.filling[ingredient]++;
+}
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 @import '@/assets/scss/ds-system/ds.scss';
 @import '@/assets/scss/mixins/mixins.scss';
 
@@ -202,9 +144,8 @@ const sizeItems = sizesJSON.map(normalizeSizes);
 @import '@/assets/scss/blocks/counter.scss';
 @import '@/assets/scss/blocks/title.scss';
 @import '@/assets/scss/blocks/filling.scss';
-@import '@/assets/scss/blocks/pizza.scss';
-@import '@/assets/scss/blocks/dough.scss';
-@import '@/assets/scss/blocks/diameter.scss';
+// @import '@/assets/scss/blocks/dough.scss';
+// @import '@/assets/scss/blocks/diameter.scss';
 @import '@/assets/scss/blocks/ingredients.scss';
 // @import '@/assets/scss/blocks/cart-list.scss';
 // @import '@/assets/scss/blocks/cart.scss';

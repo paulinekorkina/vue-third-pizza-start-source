@@ -17,7 +17,7 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
-  transferData: {
+  dataTransfer: {
     type: Object,
     required: true,
   },
