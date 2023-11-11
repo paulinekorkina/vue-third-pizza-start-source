@@ -141,12 +141,12 @@ function addIngredient(ingredient) {
 @import '@/assets/scss/blocks/select.scss';
 @import '@/assets/scss/blocks/radio.scss';
 @import '@/assets/scss/blocks/button.scss';
-@import '@/assets/scss/blocks/counter.scss';
+// @import '@/assets/scss/blocks/counter.scss';
 @import '@/assets/scss/blocks/title.scss';
-@import '@/assets/scss/blocks/filling.scss';
+// @import '@/assets/scss/blocks/filling.scss';
 // @import '@/assets/scss/blocks/dough.scss';
 // @import '@/assets/scss/blocks/diameter.scss';
-@import '@/assets/scss/blocks/ingredients.scss';
+// @import '@/assets/scss/blocks/ingredients.scss';
 // @import '@/assets/scss/blocks/cart-list.scss';
 // @import '@/assets/scss/blocks/cart.scss';
 // @import '@/assets/scss/blocks/product.scss';
