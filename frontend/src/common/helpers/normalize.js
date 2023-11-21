@@ -2,6 +2,7 @@ import doughSizes from '@/common/data/doughSizes';
 import ingredients from '@/common/data/ingredients';
 import sauces from '@/common/data/sauces';
 import sizes from '@/common/data/sizes';
+import miscs from '@/common/data/miscs';
 
 export const normalizeDough = (dough) => {
   return {
@@ -28,5 +29,12 @@ export const normalizeSizes = (size) => {
   return {
     ...size,
     value: sizes[size.id],
+  };
+};
+
+export const normalizeMisc = (misc) => {
+  return {
+    ...misc,
+    value: miscs[misc.id],
   };
 };

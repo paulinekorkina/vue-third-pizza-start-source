@@ -125,33 +125,15 @@ function addIngredient(ingredient) {
 @import '@/assets/scss/ds-system/ds.scss';
 @import '@/assets/scss/mixins/mixins.scss';
 
-@import '@/assets/scss/layout/main.scss';
-@import '@/assets/scss/layout/content.scss';
-@import '@/assets/scss/layout/sheet.scss';
-@import '@/assets/scss/layout/container.scss';
-@import '@/assets/scss/layout/layout.scss';
-@import '@/assets/scss/layout/popup.scss';
-@import '@/assets/scss/layout/layout-form.scss';
-@import '@/assets/scss/layout/sign-form.scss';
-
-// @import '@/assets/scss/blocks/icon.scss';
-// @import '@/assets/scss/blocks/logo.scss';
-// @import '@/assets/scss/blocks/close.scss';
-@import '@/assets/scss/blocks/input.scss';
-@import '@/assets/scss/blocks/select.scss';
-@import '@/assets/scss/blocks/radio.scss';
-@import '@/assets/scss/blocks/button.scss';
 // @import '@/assets/scss/blocks/counter.scss';
-@import '@/assets/scss/blocks/title.scss';
 // @import '@/assets/scss/blocks/filling.scss';
 // @import '@/assets/scss/blocks/dough.scss';
 // @import '@/assets/scss/blocks/diameter.scss';
 // @import '@/assets/scss/blocks/ingredients.scss';
-// @import '@/assets/scss/blocks/cart-list.scss';
-// @import '@/assets/scss/blocks/cart.scss';
+
 // @import '@/assets/scss/blocks/product.scss';
 // @import '@/assets/scss/blocks/additional-list.scss';
-// @import '@/assets/scss/blocks/cart-form.scss';
+
 // @import '@/assets/scss/blocks/footer.scss';
 // @import '@/assets/scss/blocks/order.scss';
 // @import '@/assets/scss/blocks/user.scss';
