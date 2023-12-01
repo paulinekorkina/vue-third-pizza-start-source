@@ -9,19 +9,19 @@
         class="ingredients__item"
       >
         <app-drag
-          :draggable="getValue(ingredientType.value) < MAX_INGREDIENT_COUNT"
+          :draggable="values[ingredientType.id] < MAX_INGREDIENT_COUNT"
           :data-transfer="ingredientType"
         >
-          <span :class="`filling filling--${ingredientType.value}`">{{
-            ingredientType.name
-          }}</span>
+          <span :class="`filling filling--${ingredientType.value}`"
+            >{{ ingredientType.name }}
+          </span>
 
           <app-counter
             class="ingredients__counter"
-            :value="getValue(ingredientType.value)"
+            :value="values[ingredientType.id]"
             :min="0"
             :max="MAX_INGREDIENT_COUNT"
-            @input="inputValue(ingredientType.value, $event)"
+            @input="inputValue(ingredientType.id, $event)"
           />
         </app-drag>
       </li>
@@ -54,10 +54,6 @@ const props = defineProps({
 
 const emit = defineEmits(['update']);
 const values = toRef(props, 'values');
-
-const getValue = (ingredient) => {
-  return values.value[ingredient] ?? 0;
-};
 
 const setValue = (ingredient, count) => {
   emit('update', ingredient, Number(count));

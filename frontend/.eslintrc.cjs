@@ -12,7 +12,7 @@ module.exports = {
     'vue/setup-compiler-macros': true,
   },
   parserOptions: {
-    ecmaVersion: 8,
+    ecmaVersion: 'latest',
     sourceType: 'module',
     ecmaFeatures: {
       jsx: true,

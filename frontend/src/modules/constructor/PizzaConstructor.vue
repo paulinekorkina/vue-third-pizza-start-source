@@ -1,13 +1,13 @@
 <template>
-  <app-drop @drop="$emit('drop', $event.value)">
+  <app-drop @drop="$emit('drop', $event.id)">
     <div class="content__constructor">
       <div :class="`pizza pizza--foundation--${dough}-${sauce}`">
         <div class="pizza__wrapper">
           <div
-            v-for="(amount, ingredient) in filling"
-            :key="ingredient"
+            v-for="ingredient in filling"
+            :key="ingredient.id"
             class="pizza__filling"
-            :class="getClassesList(ingredient, amount)"
+            :class="getClassesList(ingredient)"
           ></div>
         </div>
       </div>
@@ -28,23 +28,23 @@ defineProps({
     required: true,
   },
   filling: {
-    type: Object,
-    default: () => ({}),
+    type: Array,
+    default: () => [],
   },
 });
 
 defineEmits(['drop']);
 
-function getClassesList(ingredient, count) {
-  switch (count) {
+function getClassesList(ingredient) {
+  switch (ingredient.quantity) {
     case 0:
       break;
     case 1:
-      return `pizza__filling--${ingredient}`;
+      return `pizza__filling--${ingredient.value}`;
     case 2:
-      return `pizza__filling--${ingredient} pizza__filling--second`;
+      return `pizza__filling--${ingredient.value} pizza__filling--second`;
     case 3:
-      return `pizza__filling--${ingredient} pizza__filling--third`;
+      return `pizza__filling--${ingredient.value} pizza__filling--third`;
   }
 }
 </script>

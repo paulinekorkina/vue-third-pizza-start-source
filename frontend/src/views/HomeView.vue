@@ -4,9 +4,9 @@
       <div class="content__wrapper">
         <h1 class="title title--big">Конструктор пиццы</h1>
 
-        <dough-selector v-model="pizza.dough" :items="doughItems" />
+        <dough-selector v-model="doughId" :items="dataStore.dough" />
 
-        <size-selector v-model="pizza.size" :items="sizeItems" />
+        <size-selector v-model="sizeId" :items="dataStore.sizes" />
 
         <div class="content__ingredients">
           <div class="sheet">
@@ -15,11 +15,11 @@
             </h2>
 
             <div class="sheet__content ingredients">
-              <sauce-selector v-model="pizza.sauce" :items="sauceItems" />
+              <sauce-selector v-model="sauceId" :items="dataStore.sauces" />
               <ingredients-selector
-                :items="ingredientItems"
-                :values="pizza.filling"
-                @update="updateIngredientAmount"
+                :items="dataStore.ingredients"
+                :values="pizzaStore.ingredientQuantities"
+                @update="pizzaStore.setIngredientQuantity"
               />
             </div>
           </div>
@@ -29,7 +29,7 @@
           <label class="input">
             <span class="visually-hidden">Название пиццы</span>
             <input
-              v-model="pizza.name"
+              v-model="name"
               type="text"
               name="pizza_name"
               placeholder="Введите название пиццы"
@@ -37,15 +37,20 @@
           </label>
 
           <pizza-constructor
-            :dough="pizza.dough"
-            :sauce="pizza.sauce"
-            :filling="pizza.filling"
-            @drop="addIngredient"
+            :dough="pizzaStore.dough.value"
+            :sauce="pizzaStore.sauce.value"
+            :filling="pizzaStore.ingredientsExtended"
+            @drop="pizzaStore.incrementIngredientQuantity"
           />
 
           <div class="content__result">
-            <p>Итого: {{ price }} ₽</p>
-            <button type="button" class="button" :disabled="disableSubmit">
+            <p>Итого: {{ pizzaStore.pizzaPrice }} ₽</p>
+            <button
+              type="button"
+              class="button"
+              :disabled="disableSubmit"
+              @click="addToCart"
+            >
               Готовьте!
             </button>
           </div>
@@ -56,7 +61,9 @@
 </template>
 
 <script setup>
-import { reactive, computed } from 'vue';
+import { computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { usePizzaStore, useDataStore, useCartStore } from '@/stores';
 
 import DoughSelector from '../modules/constructor/DoughSelector.vue';
 import SizeSelector from '../modules/constructor/SizeSelector.vue';
@@ -64,78 +71,69 @@ import SauceSelector from '../modules/constructor/SauceSelector.vue';
 import IngredientsSelector from '../modules/constructor/IngredientsSelector.vue';
 import PizzaConstructor from '../modules/constructor/PizzaConstructor.vue';
 
-import {
-  normalizeDough,
-  normalizeIngredients,
-  normalizeSauces,
-  normalizeSizes,
-} from '@/common/helpers/normalize.js';
+const router = useRouter();
 
-import doughJSON from '@/mocks/dough.json';
-import ingredientsJSON from '@/mocks/ingredients.json';
-import saucesJSON from '@/mocks/sauces.json';
-import sizesJSON from '@/mocks/sizes.json';
+const pizzaStore = usePizzaStore();
+const dataStore = useDataStore();
+const cartStore = useCartStore();
 
-const doughItems = doughJSON.map(normalizeDough);
-const ingredientItems = ingredientsJSON.map(normalizeIngredients);
-const sauceItems = saucesJSON.map(normalizeSauces);
-const sizeItems = sizesJSON.map(normalizeSizes);
-
-const pizza = reactive({
-  name: '',
-  dough: doughItems[0].value,
-  size: sizeItems[0].value,
-  sauce: sauceItems[0].value,
-  filling: ingredientItems.reduce((accumulator, item) => {
-    accumulator[item.value] = 0;
-    return accumulator;
-  }, {}),
+const name = computed({
+  get() {
+    return pizzaStore.name;
+  },
+  set(value) {
+    pizzaStore.setName(value);
+  },
 });
 
-const price = computed(() => {
-  const { dough, size, sauce, filling } = pizza;
+const doughId = computed({
+  get() {
+    return pizzaStore.dough.id;
+  },
+  set(value) {
+    pizzaStore.setDough(value);
+  },
+});
 
-  const sizeMultiplier = sizeItems.find((i) => i.value === size).multiplier;
+const sauceId = computed({
+  get() {
+    return pizzaStore.sauce.id;
+  },
+  set(value) {
+    pizzaStore.setSauce(value);
+  },
+});
 
-  const doughPrice = doughItems.find((i) => i.value === dough).price;
-
-  const saucePrice = sauceItems.find((i) => i.value === sauce).price;
-
-  const fillingPrice = ingredientItems
-    .map((item) => filling[item.value] * item.price)
-    .reduce((acc, item) => acc + item, 0);
-
-  return sizeMultiplier * (doughPrice + saucePrice + fillingPrice);
+const sizeId = computed({
+  get() {
+    return pizzaStore.size.id;
+  },
+  set(value) {
+    pizzaStore.setSize(value);
+  },
 });
 
 const disableSubmit = computed(
-  () => pizza.name.length === 0 || pizza.price === 0
+  () => name.value.length === 0 || pizzaStore.pizzaPrice === 0
 );
 
-function updateIngredientAmount(ingredient, amount) {
-  pizza.filling[ingredient] = amount;
-}
+const addToCart = async () => {
+  cartStore.savePizza(pizzaStore.$state);
+  await router.push({ name: 'cart' });
+  resetPizza();
+};
 
-function addIngredient(ingredient) {
-  pizza.filling[ingredient]++;
-}
+const resetPizza = () => {
+  pizzaStore.setName('');
+  pizzaStore.setDough(dataStore.dough[0].id);
+  pizzaStore.setSize(dataStore.sizes[0].id);
+  pizzaStore.setSauce(dataStore.sauces[0].id);
+  pizzaStore.setIngredients([]);
+};
+
+onMounted(() => {
+  if (pizzaStore.index === null) {
+    resetPizza();
+  }
+});
 </script>
-
-<style lang="scss">
-@import '@/assets/scss/ds-system/ds.scss';
-@import '@/assets/scss/mixins/mixins.scss';
-
-// @import '@/assets/scss/blocks/counter.scss';
-// @import '@/assets/scss/blocks/filling.scss';
-// @import '@/assets/scss/blocks/dough.scss';
-// @import '@/assets/scss/blocks/diameter.scss';
-// @import '@/assets/scss/blocks/ingredients.scss';
-
-// @import '@/assets/scss/blocks/product.scss';
-// @import '@/assets/scss/blocks/additional-list.scss';
-
-// @import '@/assets/scss/blocks/footer.scss';
-// @import '@/assets/scss/blocks/order.scss';
-// @import '@/assets/scss/blocks/user.scss';
-// @import '@/assets/scss/blocks/address-form.scss';
-</style>

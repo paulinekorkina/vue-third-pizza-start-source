@@ -10,9 +10,9 @@
       <input
         type="radio"
         name="sauce"
-        :value="sauceType.value"
-        :checked="sauceType.value === modelValue"
-        @input="$emit('update:modelValue', sauceType.value)"
+        :value="sauceType.id"
+        :checked="sauceType.id === modelValue"
+        @input="$emit('update:modelValue', sauceType.id)"
       />
       <span>{{ sauceType.name }}</span>
     </label>
@@ -26,8 +26,8 @@ defineProps({
     default: () => [],
   },
   modelValue: {
-    type: String,
-    default: '',
+    type: Number,
+    default: 0,
   },
 });
 
