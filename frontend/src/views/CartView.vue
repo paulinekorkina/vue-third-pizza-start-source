@@ -25,7 +25,7 @@
                 class="product__img"
                 width="56"
                 height="56"
-                alt="Капричоза"
+                :alt="pizza.name"
               />
               <div class="product__text">
                 <h2>{{ pizza.name }}</h2>

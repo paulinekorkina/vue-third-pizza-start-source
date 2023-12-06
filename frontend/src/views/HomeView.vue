@@ -4,7 +4,7 @@
       <div class="content__wrapper">
         <h1 class="title title--big">Конструктор пиццы</h1>
 
-        <dough-selector v-model="doughId" :items="dataStore.dough" />
+        <dough-selector v-model="doughId" :items="dataStore.doughs" />
 
         <size-selector v-model="sizeId" :items="dataStore.sizes" />
 
@@ -114,7 +114,7 @@ const sizeId = computed({
 });
 
 const disableSubmit = computed(
-  () => name.value.length === 0 || pizzaStore.pizzaPrice === 0
+  () => name.value.length === 0 || pizzaStore.price === 0
 );
 
 const addToCart = async () => {
@@ -124,8 +124,9 @@ const addToCart = async () => {
 };
 
 const resetPizza = () => {
+  pizzaStore.setIndex(null);
   pizzaStore.setName('');
-  pizzaStore.setDough(dataStore.dough[0].id);
+  pizzaStore.setDough(dataStore.doughs[0].id);
   pizzaStore.setSize(dataStore.sizes[0].id);
   pizzaStore.setSauce(dataStore.sauces[0].id);
   pizzaStore.setIngredients([]);

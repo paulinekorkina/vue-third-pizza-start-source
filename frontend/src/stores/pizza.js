@@ -19,11 +19,11 @@ export const usePizzaStore = defineStore('pizza', {
     },
     dough: (state) => {
       const data = useDataStore();
-      return data.doughs.find((i) => i.id === state.sauceId) ?? data.doughs[0];
+      return data.doughs.find((i) => i.id === state.doughId) ?? data.doughs[0];
     },
     size: (state) => {
       const data = useDataStore();
-      return data.sizes.find((i) => i.id === state.sauceId) ?? data.sizes[0];
+      return data.sizes.find((i) => i.id === state.sizeId) ?? data.sizes[0];
     },
     ingredientsExtended: (state) => {
       const data = useDataStore();
@@ -45,6 +45,9 @@ export const usePizzaStore = defineStore('pizza', {
     },
   },
   actions: {
+    setIndex(index) {
+      this.index = index;
+    },
     setName(name) {
       this.name = name;
     },
