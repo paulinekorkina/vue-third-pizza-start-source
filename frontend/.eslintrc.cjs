@@ -25,5 +25,6 @@ module.exports = {
         singleQuote: true,
       },
     ],
+    'no-else-return': ['error', { allowElseIf: false }],
   },
 };
