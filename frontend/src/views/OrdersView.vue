@@ -4,210 +4,85 @@
       <h1 class="title title--big">История заказов</h1>
     </div>
 
-    <section class="sheet order">
+    <section
+      v-for="order in profileStore.ordersExtended"
+      :key="order.id"
+      class="sheet order"
+    >
       <div class="order__wrapper">
         <div class="order__number">
-          <b>Заказ #11199929</b>
+          <b>Заказ #{{ order.id }}</b>
         </div>
 
         <div class="order__sum">
-          <span>Сумма заказа: 1&nbsp;564 ₽</span>
+          <span>Сумма заказа: {{ order.orderTotal.toLocaleString() }} ₽</span>
         </div>
 
         <div class="order__button">
-          <button type="button" class="button button--border">Удалить</button>
+          <button
+            type="button"
+            class="button button--border"
+            @click="profileStore.removeOrder(order.id)"
+          >
+            Удалить
+          </button>
         </div>
         <div class="order__button">
-          <button type="button" class="button">Повторить</button>
+          <button
+            type="button"
+            class="button"
+            @click="profileStore.repeatOrder(order.id)"
+          >
+            Повторить
+          </button>
         </div>
       </div>
 
       <ul class="order__list">
-        <li class="order__item">
+        <li
+          v-for="pizza in order.orderPizzas"
+          :key="pizza.id"
+          class="order__item"
+        >
           <div class="product">
             <img
               :src="getImage('product.svg')"
               class="product__img"
               width="56"
               height="56"
-              alt="Капричоза"
+              :alt="pizza.name"
             />
             <div class="product__text">
-              <h2>Капричоза</h2>
+              <h2>{{ pizza.name }}</h2>
               <ul>
-                <li>30 см, на тонком тесте</li>
-                <li>Соус: томатный</li>
-                <li>
-                  Начинка: грибы, лук, ветчина, пармезан, ананас, бекон, блю чиз
-                </li>
+                <li>{{ pizza.size }}, {{ pizza.dough }} тесто</li>
+                <li>Соус: {{ pizza.sauce }}</li>
+                <li>Начинка: {{ pizza.ingredients }}</li>
               </ul>
             </div>
           </div>
 
-          <p class="order__price">782 ₽</p>
-        </li>
-        <li class="order__item">
-          <div class="product">
-            <img
-              :src="getImage('product.svg')"
-              class="product__img"
-              width="56"
-              height="56"
-              alt="Капричоза"
-            />
-            <div class="product__text">
-              <h2>Моя любимая</h2>
-              <ul>
-                <li>30 см, на тонком тесте</li>
-                <li>Соус: томатный</li>
-                <li>Начинка: грибы, лук, ветчина, пармезан, ананас</li>
-              </ul>
-            </div>
-          </div>
-
-          <p class="order__price">2х782 ₽</p>
-        </li>
-      </ul>
-
-      <ul class="order__additional">
-        <li>
-          <img
-            :src="getImage('cola.svg')"
-            width="20"
-            height="30"
-            alt="Coca-Cola 0,5 литра"
-          />
-          <p>
-            <span>Coca-Cola 0,5 литра</span>
-            <b>56 ₽</b>
-          </p>
-        </li>
-        <li>
-          <img
-            :src="getImage('sauce.svg')"
-            width="20"
-            height="30"
-            alt="Острый соус"
-          />
-          <span>Острый соус <br />30 ₽</span>
-        </li>
-        <li>
-          <img
-            :src="getImage('potato.svg')"
-            width="20"
-            height="30"
-            alt="Картошка из печи"
-          />
-          <p>
-            <span>Картошка из печи</span>
-            <b>170 ₽</b>
+          <p class="order__price">
+            <span v-if="pizza.quantity > 1">{{ pizza.quantity }}х</span
+            >{{ pizza.price.toLocaleString() }} ₽
           </p>
         </li>
       </ul>
 
-      <p class="order__address">
-        Адрес доставки: Тест (или если адрес новый - писать целиком)
-      </p>
-    </section>
-
-    <section class="sheet order">
-      <div class="order__wrapper">
-        <div class="order__number">
-          <b>Заказ #11199929</b>
-        </div>
-
-        <div class="order__sum">
-          <span>Сумма заказа: 1&nbsp;564 ₽</span>
-        </div>
-
-        <div class="order__button">
-          <button type="button" class="button button--border">Удалить</button>
-        </div>
-        <div class="order__button">
-          <button type="button" class="button">Повторить</button>
-        </div>
-      </div>
-
-      <ul class="order__list">
-        <li class="order__item">
-          <div class="product">
-            <img
-              :src="getImage('product.svg')"
-              class="product__img"
-              width="56"
-              height="56"
-              alt="Капричоза"
-            />
-            <div class="product__text">
-              <h2>Капричоза</h2>
-              <p>
-                30 см, на тонком тесте<br />
-                Соус: томатный<br />
-                Начинка: грибы, лук, ветчина, пармезан, ананас
-              </p>
-            </div>
-          </div>
-
-          <p class="order__price">782 ₽</p>
-        </li>
-        <li class="order__item">
-          <div class="product">
-            <img
-              :src="getImage('product.svg')"
-              class="product__img"
-              width="56"
-              height="56"
-              alt="Капричоза"
-            />
-            <div class="product__text">
-              <h2>Моя любимая</h2>
-              <p>
-                30 см, на тонком тесте<br />
-                Соус: томатный<br />
-                Начинка: грибы, лук, ветчина, пармезан, ананас
-              </p>
-            </div>
-          </div>
-
-          <p class="order__price">2х782 ₽</p>
-        </li>
-      </ul>
-
-      <ul class="order__additional">
-        <li>
+      <ul v-if="order.orderMisc" class="order__additional">
+        <li v-for="misc in order.orderMisc" :key="misc.id">
           <img
-            :src="getImage('cola.svg')"
+            :src="getPublicImage(misc.image)"
             width="20"
             height="30"
-            alt="Coca-Cola 0,5 литра"
+            :alt="misc.name"
           />
           <p>
-            <span>Coca-Cola 0,5 литра</span>
-            <b>56 ₽</b>
-          </p>
-        </li>
-        <li>
-          <img
-            :src="getImage('sauce.svg')"
-            width="20"
-            height="30"
-            alt="Острый соус"
-          />
-          <p>
-            <span>Острый соус</span>
-            <b>30 ₽</b>
-          </p>
-        </li>
-        <li>
-          <img
-            :src="getImage('potato.svg')"
-            width="20"
-            height="30"
-            alt="Картошка из печи"
-          />
-          <p>
-            <span>Картошка из печи</span>
-            <b>170 ₽</b>
+            <span>{{ misc.name }}</span>
+            <b
+              ><span v-if="misc.quantity > 1">{{ misc.quantity }}х</span
+              >{{ misc.price }} ₽</b
+            >
           </p>
         </li>
       </ul>
@@ -220,7 +95,10 @@
 </template>
 
 <script setup>
-import { getImage } from '@/common/helpers/index.js';
+import { getImage, getPublicImage } from '@/common/helpers/index.js';
+import { useProfileStore } from '@/stores';
+
+const profileStore = useProfileStore();
 </script>
 
 <style lang="scss" scoped>
@@ -228,4 +106,5 @@ import { getImage } from '@/common/helpers/index.js';
 @import '@/assets/scss/mixins/mixins.scss';
 
 @import '@/assets/scss/blocks/order.scss';
+@import '@/assets/scss/blocks/product.scss';
 </style>

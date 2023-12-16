@@ -3,6 +3,8 @@ import resources from '@/services/resources';
 import jwtService from '@/services/jwt/jwt.service';
 import { useProfileStore } from '@/stores/profile';
 
+// TODO: resources.auth заменить на const {auth} = resources;
+
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null,

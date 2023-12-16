@@ -18,7 +18,7 @@ if (token) {
   try {
     const authStore = useAuthStore();
     await authStore.whoAmI();
-    await router.push('/');
+    // await router.push('/');
   } catch (e) {
     jwtService.destroyToken();
     console.log(e);

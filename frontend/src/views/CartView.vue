@@ -30,11 +30,18 @@
               <div class="product__text">
                 <h2>{{ pizza.name }}</h2>
                 <ul>
-                  <li>{{ pizza.size.name }}, {{ pizza.dough.name }} тесто</li>
+                  <li>
+                    {{ pizza.size.name }},
+                    {{ pizza.dough.name.toLowerCase() }} тесто
+                  </li>
                   <li>Соус: {{ pizza.sauce.name.toLowerCase() }}</li>
                   <li>
                     Начинка:
-                    {{ pizza.ingredients.map((i) => i.name).join(', ') }}
+                    {{
+                      pizza.ingredients
+                        .map((i) => i.name.toLowerCase())
+                        .join(', ')
+                    }}
                   </li>
                 </ul>
               </div>
@@ -47,7 +54,7 @@
             />
 
             <div class="cart-list__price">
-              <b>{{ pizza.price * pizza.quantity }} ₽</b>
+              <b>{{ (pizza.price * pizza.quantity).toLocaleString() }} ₽</b>
             </div>
 
             <div class="cart-list__button">
@@ -71,7 +78,7 @@
             >
               <p class="additional-list__description">
                 <img
-                  :src="getImage(`${misc.image}.svg`)"
+                  :src="getPublicImage(misc.image)"
                   width="39"
                   height="60"
                   :alt="misc.name"
@@ -181,7 +188,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { getImage } from '@/common/helpers/index.js';
+import { getImage, getPublicImage } from '@/common/helpers/index.js';
 import AppCounter from '@/common/components/AppCounter.vue';
 
 import { usePizzaStore, useProfileStore, useCartStore } from '@/stores';
@@ -242,7 +249,8 @@ const submit = async () => {
   if (deliveryOption.value === 'home') {
     cartStore.setAddress(profileStore.addresses[0]);
   }
-  await router.push({ name: 'success' });
+  await cartStore.createOrder();
+  router.push({ name: 'success' });
 };
 </script>
 

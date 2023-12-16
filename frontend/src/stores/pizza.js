@@ -95,7 +95,8 @@ export const usePizzaStore = defineStore('pizza', {
       if (ingredientIdx === -1 && count > 0) {
         this.addIngredient(ingredientId);
         return;
-      } else if (ingredientIdx === -1) {
+      }
+      if (ingredientIdx === -1) {
         return;
       }
 

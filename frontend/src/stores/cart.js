@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { pizzaPrice } from '@/common/helpers/pizza-price';
-import { useDataStore } from '@/stores/data';
+import { useDataStore, useAuthStore } from '@/stores';
+import resources from '../services/resources';
 
 export const useCartStore = defineStore('cart', {
   state: () => ({
@@ -62,6 +63,8 @@ export const useCartStore = defineStore('cart', {
     savePizza(pizza) {
       const { index, ...pizzaData } = pizza;
 
+      console.log(index);
+
       if (index !== null) {
         this.pizzas[index] = {
           quantity: this.pizzas[index].quantity,
@@ -92,7 +95,8 @@ export const useCartStore = defineStore('cart', {
           quantity: 1,
         });
         return;
-      } else if (miscIdx === -1) {
+      }
+      if (miscIdx === -1) {
         return;
       }
 
@@ -122,6 +126,19 @@ export const useCartStore = defineStore('cart', {
     },
     setComment(comment) {
       this.address.street = comment;
+    },
+    async createOrder() {
+      const authStore = useAuthStore();
+      // const order = {...this.phone, }
+      // resources.order.createOrder(this);
+      const order = {
+        userId: authStore.user?.id,
+        phone: this.phone,
+        // address: { ...this.address },
+        pizzas: [...this.pizzas],
+        misc: [...this.misc],
+      };
+      await resources.order.createOrder(order);
     },
   },
 });
