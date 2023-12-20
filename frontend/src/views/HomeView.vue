@@ -44,7 +44,7 @@
           />
 
           <div class="content__result">
-            <p>Итого: {{ pizzaStore.pizzaPrice }} ₽</p>
+            <p>Итого: {{ pizzaStore.price.toLocaleString() }} ₽</p>
             <button
               type="button"
               class="button"

@@ -44,11 +44,16 @@ const getOrderTotal = (order) => {
     .map((item) => item.quantity * pizzaPrice(item))
     .reduce((acc, val) => acc + val, 0);
 
-  const miscPrices = order.orderMisc
-    .map(
-      (item) => item.quantity * dataMisc.find((i) => i.id === item.miscId).price
-    )
-    .reduce((acc, val) => acc + val, 0);
+  let miscPrices = 0;
+
+  if (order.orderMisc) {
+    miscPrices = order.orderMisc
+      .map(
+        (item) =>
+          item.quantity * dataMisc.find((i) => i.id === item.miscId).price
+      )
+      .reduce((acc, val) => acc + val, 0);
+  }
 
   return pizzaPrices + miscPrices;
 };
@@ -60,11 +65,28 @@ export const useProfileStore = defineStore('profile', {
   }),
   getters: {
     ordersExtended: (state) => {
+      const orderAddress = ({ addressId }) => {
+        if (addressId) {
+          return state.addresses.find((address) => address.id === addressId);
+        }
+        return 'самовывоз'; //название адреса из профиля, полный адрес если новый, иначе самовывоз
+      };
+
       return state.orders.map((order) => ({
         ...order,
         orderPizzas: order.orderPizzas.map(getPizzasExtended),
-        orderMisc: order.orderMisc.map(getMiscExtended),
+        orderMisc: order.orderMisc?.map(getMiscExtended),
         orderTotal: getOrderTotal(order),
+        orderAddress: orderAddress(order),
+      }));
+    },
+    addressExtended: (state) => {
+      const fullAddress = ({ street, building, flat }) => {
+        return `${street}, д. ${building}${flat ? `, кв. ${flat}` : ``}`;
+      };
+      return state.addresses.map((address) => ({
+        fullAddress: fullAddress(address),
+        ...address,
       }));
     },
   },
@@ -88,6 +110,15 @@ export const useProfileStore = defineStore('profile', {
       });
 
       router.push({ name: 'cart' });
+    },
+    async addAddress(address) {
+      const res = await resources.address.addAddress(address);
+      console.log(res);
+      if (res.__state === 'success') {
+        this.addresses = [...this.addresses, res.data];
+        return 'success';
+      }
+      return res.data.message;
     },
     async removeOrder(id) {
       await resources.order.removeOrder(id);

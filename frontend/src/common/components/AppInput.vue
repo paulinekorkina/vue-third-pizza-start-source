@@ -1,19 +1,17 @@
-<template>
-  <div class="text-field">
-    <input
-      :value="modelValue"
-      :type="type"
-      :name="name"
-      class="text-field__input"
-      :class="{ 'text-field__input--error': showError }"
-      :placeholder="placeholder"
-      :required="required"
-      @input="emit('update:modelValue', $event.target.value)"
-    />
-    <span v-if="showError" class="text-field__text">
-      {{ errorText }}
-    </span>
-  </div>
+<template :class="{ 'input--error': showError }">
+  <!-- <div class="text-field"> -->
+  <input
+    :value="modelValue"
+    :type="type"
+    :name="name"
+    :placeholder="placeholder"
+    :required="required"
+    @input="emit('update:modelValue', $event.target.value)"
+  />
+  <span v-if="showError" class="error">
+    {{ errorText }}
+  </span>
+  <!-- </div> -->
 </template>
 
 <script setup>

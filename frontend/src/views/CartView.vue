@@ -172,12 +172,7 @@
       </div>
 
       <div class="footer__submit">
-        <button
-          type="submit"
-          class="button"
-          :disabled="cartStore.total === 0"
-          @click="submit"
-        >
+        <button type="submit" class="button" :disabled="cartStore.total === 0">
           Оформить заказ
         </button>
       </div>

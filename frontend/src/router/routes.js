@@ -26,12 +26,12 @@ export default [
     meta: { layout: 'DefaultLayout', middlewares: [isLoggedIn] },
     children: [
       {
-        path: '/orders',
+        path: 'orders',
         name: 'orders',
         component: () => import('@/views/OrdersView.vue'),
       },
       {
-        path: '/profile',
+        path: 'profile',
         name: 'profile',
         component: () => import('@/views/ProfileView.vue'),
       },
