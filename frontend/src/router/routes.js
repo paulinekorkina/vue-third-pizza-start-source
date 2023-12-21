@@ -17,7 +17,7 @@ export default [
     path: '/cart',
     name: 'cart',
     component: () => import('@/views/CartView.vue'),
-    meta: { layout: 'SimpleLayout' },
+    meta: { layout: 'DefaultLayout' },
   },
   {
     path: '/user',

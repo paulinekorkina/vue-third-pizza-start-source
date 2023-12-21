@@ -46,11 +46,12 @@
 import { ref, watch } from 'vue';
 import AppInput from '@/common/components/AppInput.vue';
 import { validateFields, clearValidationErrors } from '@/common/validator';
-import { useRouter } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores';
 
 const authStore = useAuthStore();
 const router = useRouter();
+const route = useRoute();
 
 const resetValidations = () => {
   return {
@@ -100,7 +101,8 @@ const login = async () => {
 
   if (resMsg === 'success') {
     await authStore.whoAmI();
-    await router.push({ name: 'home' });
+    const routeName = route.query?.redirect || '/';
+    await router.push({ path: routeName });
   } else {
     errorMessage.value = resMsg;
   }

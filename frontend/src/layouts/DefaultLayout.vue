@@ -1,5 +1,5 @@
 <template>
-  <div class="app_layout">
+  <div class="default-layout">
     <default-header />
     <slot />
   </div>

@@ -9,8 +9,8 @@ const getPizzasExtended = (pizza) => {
   return {
     dough: doughs.find((i) => i.id === pizza.doughId).name.toLowerCase(),
     ingredients: pizza.ingredients.map(getPizzaIngredients).join(', '),
-    sauce: sauces.find((i) => i.id === pizza.sauceId).name.toLowerCase(),
-    size: sizes.find((i) => i.id === pizza.sizeId).name.toLowerCase(),
+    sauce: sauces.find((i) => i.id === pizza.sauceId)?.name.toLowerCase(),
+    size: sizes.find((i) => i.id === pizza.sizeId)?.name.toLowerCase(),
     name: pizza.name,
     quantity: pizza.quantity,
     price: pizzaPrice(pizza),
@@ -40,20 +40,18 @@ const getMiscExtended = (orderMisc) => {
 const getOrderTotal = (order) => {
   const dataMisc = useDataStore().misc;
 
-  const pizzaPrices = order.orderPizzas
-    .map((item) => item.quantity * pizzaPrice(item))
-    .reduce((acc, val) => acc + val, 0);
+  const pizzaPrices =
+    order.orderPizzas
+      ?.map((item) => item.quantity * pizzaPrice(item))
+      .reduce((acc, val) => acc + val, 0) || 0;
 
-  let miscPrices = 0;
-
-  if (order.orderMisc) {
-    miscPrices = order.orderMisc
-      .map(
+  const miscPrices =
+    order.orderMisc
+      ?.map(
         (item) =>
           item.quantity * dataMisc.find((i) => i.id === item.miscId).price
       )
-      .reduce((acc, val) => acc + val, 0);
-  }
+      .reduce((acc, val) => acc + val, 0) || 0;
 
   return pizzaPrices + miscPrices;
 };
@@ -74,7 +72,7 @@ export const useProfileStore = defineStore('profile', {
 
       return state.orders.map((order) => ({
         ...order,
-        orderPizzas: order.orderPizzas.map(getPizzasExtended),
+        orderPizzas: order.orderPizzas?.map(getPizzasExtended),
         orderMisc: order.orderMisc?.map(getMiscExtended),
         orderTotal: getOrderTotal(order),
         orderAddress: orderAddress(order),
@@ -101,11 +99,14 @@ export const useProfileStore = defineStore('profile', {
       const order = this.orders.find((item) => item.id === id);
       const cartStore = useCartStore();
 
+      console.log(order);
+
       order.orderPizzas.forEach((pizza) => {
         cartStore.savePizza({ index: null, ...pizza });
       });
 
       order.orderMisc.forEach(({ miscId, quantity }) => {
+        console.log(miscId, quantity);
         cartStore.setMiscQuantity(miscId, quantity);
       });
 
@@ -119,6 +120,12 @@ export const useProfileStore = defineStore('profile', {
         return 'success';
       }
       return res.data.message;
+    },
+    async getOrders() {
+      const res = await resources.order.getOrders();
+      if (res.__state === 'success') {
+        this.setOrders(res.data);
+      }
     },
     async removeOrder(id) {
       await resources.order.removeOrder(id);

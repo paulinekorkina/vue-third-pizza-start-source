@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { pizzaPrice } from '@/common/helpers/pizza-price';
-import { useDataStore, useAuthStore } from '@/stores';
+import { useDataStore, useAuthStore, useProfileStore } from '@/stores';
 import resources from '../services/resources';
 
 export const useCartStore = defineStore('cart', {
@@ -63,8 +63,6 @@ export const useCartStore = defineStore('cart', {
     savePizza(pizza) {
       const { index, ...pizzaData } = pizza;
 
-      console.log(index);
-
       if (index !== null) {
         this.pizzas[index] = {
           quantity: this.pizzas[index].quantity,
@@ -79,7 +77,11 @@ export const useCartStore = defineStore('cart', {
     },
     setPizzaQuantity(index, count) {
       if (this.pizzas[index]) {
-        this.pizzas[index].quantity = count;
+        if (count === 0) {
+          this.pizzas.splice(index, 1);
+        } else {
+          this.pizzas[index].quantity = count;
+        }
       }
     },
     setMiscQuantity(miscId, count) {
@@ -92,7 +94,7 @@ export const useCartStore = defineStore('cart', {
       if (miscIdx === -1 && count > 0) {
         this.misc.push({
           miscId,
-          quantity: 1,
+          quantity: count,
         });
         return;
       }
@@ -131,6 +133,7 @@ export const useCartStore = defineStore('cart', {
       const authStore = useAuthStore();
       // const order = {...this.phone, }
       // resources.order.createOrder(this);
+      // const pizzas = this.pizzas.filter((pizza) => pizza.quantity > 0);
       const order = {
         userId: authStore.user?.id,
         phone: this.phone,
@@ -138,7 +141,20 @@ export const useCartStore = defineStore('cart', {
         pizzas: [...this.pizzas],
         misc: [...this.misc],
       };
-      await resources.order.createOrder(order);
+      // console.log(pizzas);
+      // return;
+      const res = await resources.order.createOrder(order);
+      const profileStore = useProfileStore();
+      console.log(res);
+      if (res.__state === 'success') {
+        profileStore.getOrders(); // TODO: костыль
+        // profileStore.orders = [
+        //   ...profileStore.orders,
+        //   { ...order, ...res.data },
+        // ];
+        this.pizzas = [];
+        this.misc = [];
+      }
     },
   },
 });

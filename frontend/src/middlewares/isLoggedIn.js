@@ -7,6 +7,7 @@ export const isLoggedIn = ({ to }) => {
     /* Сохраняем маршрут, по которому пользователь намеревался перейти,
      * чтобы перенаправить на него пользователя после успешной авторизации
      */
+    console.log(to);
     return { path: '/login', query: { redirect: to.fullPath } };
   }
   return true;

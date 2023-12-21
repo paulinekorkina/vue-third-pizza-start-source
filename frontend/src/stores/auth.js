@@ -25,10 +25,14 @@ export const useAuthStore = defineStore('auth', {
       return res.data.message;
     },
     async logout() {
+      const profileStore = useProfileStore();
+
       await resources.auth.logout();
       jwtService.destroyToken();
       resources.auth.setAuthHeader('');
       this.user = null;
+      profileStore.setAddresses([]);
+      profileStore.setOrders([]);
     },
     async whoAmI() {
       resources.auth.setAuthHeader(jwtService.getToken());
