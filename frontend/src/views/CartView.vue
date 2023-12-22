@@ -107,14 +107,14 @@
             <label class="cart-form__select">
               <span class="cart-form__label">Получение заказа:</span>
 
-              <select
-                deliveryOption="$event.target.value"
-                name="test"
-                class="select"
-              >
-                <option value="self">Заберу сам</option>
-                <option value="new">Новый адрес</option>
-                <option value="home">Дом</option>
+              <select v-model="deliveryOption" name="test" class="select">
+                <option
+                  v-for="option in deliveryOptions"
+                  :key="option.value"
+                  :value="option.value"
+                >
+                  {{ option.text }}
+                </option>
               </select>
             </label>
 
@@ -134,24 +134,44 @@
               <div class="cart-form__input">
                 <label class="input">
                   <span>Улица*</span>
-                  <input v-model="street" type="text" name="street" />
+                  <app-input
+                    v-model="street"
+                    name="street"
+                    placeholder="Введите название улицы"
+                    :error-text="validations.street.error"
+                    :required="true"
+                  />
                 </label>
               </div>
 
               <div class="cart-form__input cart-form__input--small">
                 <label class="input">
                   <span>Дом*</span>
-                  <input v-model="building" type="text" name="house" />
+                  <app-input
+                    v-model="building"
+                    name="building"
+                    placeholder="Введите номер дома"
+                    :error-text="validations.building.error"
+                    :required="true"
+                  />
                 </label>
               </div>
 
               <div class="cart-form__input cart-form__input--small">
                 <label class="input">
                   <span>Квартира</span>
-                  <input v-model="flat" type="text" name="apartment" />
+                  <app-input
+                    v-model="flat"
+                    name="flat"
+                    placeholder="Введите № квартиры"
+                  />
                 </label>
               </div>
             </div>
+          </div>
+
+          <div v-if="errorMessage" class="server-error-message">
+            {{ errorMessage }}
           </div>
         </div>
       </div>
@@ -181,20 +201,40 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { getImage, getPublicImage } from '@/common/helpers/index.js';
 import AppCounter from '@/common/components/AppCounter.vue';
+import AppInput from '@/common/components/AppInput.vue';
+import { validateFields, clearValidationErrors } from '@/common/validator';
 
-import { usePizzaStore, useProfileStore, useCartStore } from '@/stores';
+import {
+  useAuthStore,
+  usePizzaStore,
+  useProfileStore,
+  useCartStore,
+} from '@/stores';
 
 const router = useRouter();
 
+const authStore = useAuthStore();
 const pizzaStore = usePizzaStore();
 const profileStore = useProfileStore();
 const cartStore = useCartStore();
 
 const deliveryOption = ref('self');
+const deliveryOptions = ref([
+  { value: 'self', text: 'Заберу сам' },
+  { value: 'new', text: 'Новый адрес' },
+]);
+
+onMounted(() => {
+  phone.value = authStore.user?.phone || '';
+
+  profileStore.addresses.forEach((address) => {
+    deliveryOptions.value.push({ value: address, text: address.name });
+  });
+});
 
 const editPizza = async (index) => {
   pizzaStore.loadPizza({
@@ -240,12 +280,55 @@ const flat = computed({
   },
 });
 
-const submit = async () => {
-  if (deliveryOption.value === 'home') {
-    cartStore.setAddress(profileStore.addresses[0]);
+const resetValidations = () => {
+  return {
+    street: {
+      error: '',
+      rules: ['required'],
+    },
+    building: {
+      error: '',
+      rules: ['required'],
+    },
+  };
+};
+
+const validations = ref(resetValidations());
+const errorMessage = ref(null);
+
+const watchField = (field) => () => {
+  if (errorMessage.value) {
+    errorMessage.value = null;
   }
-  await cartStore.createOrder();
-  router.push({ name: 'success' });
+
+  if (validations.value[field]?.error) {
+    clearValidationErrors(validations.value);
+  }
+};
+
+watch(street, watchField('street'));
+watch(building, watchField('building'));
+
+const submit = async () => {
+  const isValid = validateFields(
+    { street: street.value, building: building.value },
+    validations.value
+  );
+
+  if (deliveryOption.value === 'new' && !isValid) {
+    return;
+  }
+
+  if (deliveryOption.value !== 'self' && deliveryOption.value !== 'new') {
+    cartStore.setAddress(deliveryOption.value);
+  }
+  const resMsg = await cartStore.createOrder();
+
+  if (resMsg === 'success') {
+    router.push({ name: 'success' });
+  } else {
+    errorMessage.value = resMsg;
+  }
 };
 </script>
 

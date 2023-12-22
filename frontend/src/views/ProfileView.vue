@@ -41,7 +41,7 @@
   <div v-if="showForm" class="layout__address">
     <form
       class="address-form address-form--opened sheet"
-      @submit.prevent="addAddress"
+      @submit.prevent="submit"
     >
       <div class="address-form__header">
         <b>Адрес №{{ addressIndex }}</b>
@@ -212,7 +212,7 @@ const editAddress = (address) => {
   showForm.value = true;
 };
 
-const addAddress = async () => {
+const submit = async () => {
   const isValid = validateFields(
     { name: name.value, street: street.value, building: building.value },
     validations.value

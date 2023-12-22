@@ -63,11 +63,20 @@ export const useProfileStore = defineStore('profile', {
   }),
   getters: {
     ordersExtended: (state) => {
-      const orderAddress = ({ addressId }) => {
-        if (addressId) {
-          return state.addresses.find((address) => address.id === addressId);
+      const orderAddress = ({ addressId, orderAddress }) => {
+        if (orderAddress?.name) {
+          return orderAddress.name;
         }
-        return 'самовывоз'; //название адреса из профиля, полный адрес если новый, иначе самовывоз
+        if (addressId) {
+          const address = state.addresses.find(
+            (address) => address.id === addressId
+          );
+          if (address?.name) {
+            return address.name;
+          }
+          return 'самовывоз';
+        }
+        return 'самовывоз';
       };
 
       return state.orders.map((order) => ({

@@ -114,8 +114,9 @@ export const useCartStore = defineStore('cart', {
       this.phone = phone;
     },
     setAddress(address) {
-      const { street, building, flat, comment } = address;
-      this.address = { street, building, flat, comment };
+      const { id, street, building, flat, comment } = address;
+      this.address = { id, street, building, flat, comment };
+      console.log(this.address);
     },
     setStreet(street) {
       this.address.street = street;
@@ -131,21 +132,17 @@ export const useCartStore = defineStore('cart', {
     },
     async createOrder() {
       const authStore = useAuthStore();
-      // const order = {...this.phone, }
-      // resources.order.createOrder(this);
-      // const pizzas = this.pizzas.filter((pizza) => pizza.quantity > 0);
       const order = {
         userId: authStore.user?.id,
         phone: this.phone,
-        // address: { ...this.address },
         pizzas: [...this.pizzas],
         misc: [...this.misc],
       };
-      // console.log(pizzas);
-      // return;
+      if (this.address.street && this.address.building) {
+        order.address = { ...this.address };
+      }
       const res = await resources.order.createOrder(order);
       const profileStore = useProfileStore();
-      console.log(res);
       if (res.__state === 'success') {
         profileStore.getOrders(); // TODO: костыль
         // profileStore.orders = [
@@ -154,7 +151,15 @@ export const useCartStore = defineStore('cart', {
         // ];
         this.pizzas = [];
         this.misc = [];
+        this.address = {
+          street: '',
+          building: '',
+          flat: '',
+          comment: '',
+        };
+        return 'success';
       }
+      return res.data.message;
     },
   },
 });
