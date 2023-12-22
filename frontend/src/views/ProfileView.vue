@@ -28,7 +28,7 @@
       <div class="address-form__header">
         <b>Адрес №{{ index + 1 }}. {{ address.name }}</b>
         <div class="address-form__edit">
-          <button type="button" class="icon">
+          <button type="button" class="icon" @click="editAddress(address)">
             <span class="visually-hidden">Изменить адрес</span>
           </button>
         </div>
@@ -38,13 +38,13 @@
     </div>
   </div>
 
-  <div class="layout__address">
+  <div v-if="showForm" class="layout__address">
     <form
       class="address-form address-form--opened sheet"
       @submit.prevent="addAddress"
     >
       <div class="address-form__header">
-        <b>Адрес №{{ profileStore.addresses.length + 1 }}</b>
+        <b>Адрес №{{ addressIndex }}</b>
       </div>
 
       <div class="address-form__wrapper">
@@ -111,7 +111,11 @@
       </div>
 
       <div class="address-form__buttons">
-        <button type="button" class="button button--transparent">
+        <button
+          type="button"
+          class="button button--transparent"
+          @click="removeAddress"
+        >
           Удалить
         </button>
         <button type="submit" class="button">Сохранить</button>
@@ -119,15 +123,19 @@
     </form>
   </div>
 
-  <div class="layout__button">
-    <button type="button" class="button button--border">
+  <div v-if="showForm === false" class="layout__button">
+    <button
+      type="button"
+      class="button button--border"
+      @click="showForm = true"
+    >
       Добавить новый адрес
     </button>
   </div>
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, computed, watch } from 'vue';
 import AppInput from '@/common/components/AppInput.vue';
 import { validateFields, clearValidationErrors } from '@/common/validator';
 import { useAuthStore, useProfileStore } from '@/stores';
@@ -154,12 +162,22 @@ const resetValidations = () => {
 };
 
 const validations = ref(resetValidations());
+const id = ref('');
 const name = ref('');
 const street = ref('');
 const building = ref('');
 const flat = ref('');
 const comment = ref('');
+const addressIndex = computed(() => {
+  if (id.value) {
+    return (
+      profileStore.addresses.findIndex((address) => address.id === id.value) + 1
+    );
+  }
+  return profileStore.addresses.length + 1;
+});
 const errorMessage = ref(null);
+const showForm = ref(false);
 
 const watchField = (field) => () => {
   if (errorMessage.value) {
@@ -175,12 +193,23 @@ watch(name, watchField('name'));
 watch(street, watchField('street'));
 watch(building, watchField('building'));
 
-const clearAddressForm = () => {
+const resetAddressForm = () => {
+  id.value = '';
   name.value = '';
   street.value = '';
   building.value = '';
   flat.value = '';
   comment.value = '';
+};
+
+const editAddress = (address) => {
+  id.value = address.id;
+  name.value = address.name;
+  street.value = address.street;
+  building.value = address.building;
+  flat.value = address.flat;
+  comment.value = address.comment;
+  showForm.value = true;
 };
 
 const addAddress = async () => {
@@ -193,21 +222,38 @@ const addAddress = async () => {
     return;
   }
 
-  const resMsg = await profileStore.addAddress({
+  const data = {
+    userId: authStore.user.id,
     name: name.value,
     street: street.value,
     building: building.value,
     flat: flat.value,
     comment: comment.value,
-  });
+  };
 
-  console.log(resMsg);
+  let resMsg;
+
+  if (id.value) {
+    data.id = id.value;
+    resMsg = await profileStore.updateAddress(data);
+  } else {
+    resMsg = await profileStore.addAddress(data);
+  }
 
   if (resMsg === 'success') {
-    clearAddressForm();
+    resetAddressForm();
+    showForm.value = false;
   } else {
     errorMessage.value = resMsg;
   }
+};
+
+const removeAddress = async () => {
+  if (id.value) {
+    await profileStore.removeAddress(id.value);
+  }
+  resetAddressForm();
+  showForm.value = false;
 };
 </script>
 

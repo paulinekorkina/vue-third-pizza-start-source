@@ -114,14 +114,30 @@ export const useProfileStore = defineStore('profile', {
     },
     async addAddress(address) {
       const res = await resources.address.addAddress(address);
-      console.log(res);
       if (res.__state === 'success') {
         this.addresses = [...this.addresses, res.data];
         return 'success';
       }
       return res.data.message;
     },
+    async updateAddress(address) {
+      const res = await resources.address.updateAddress(address);
+      if (res.__state === 'success') {
+        const index = this.addresses.findIndex(({ id }) => id === address.id);
+        if (~index) {
+          this.addresses.splice(index, 1, address);
+        }
+        return 'success';
+      }
+    },
+    async removeAddress(id) {
+      const res = await resources.address.removeAddress(id);
+      if (res.__state === 'success') {
+        this.addresses = this.addresses.filter((address) => address.id !== id);
+      }
+    },
     async getOrders() {
+      // TODO: костыль
       const res = await resources.order.getOrders();
       if (res.__state === 'success') {
         this.setOrders(res.data);
