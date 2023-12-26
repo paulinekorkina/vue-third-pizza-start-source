@@ -21,7 +21,7 @@
           >
             <div class="product cart-list__product">
               <img
-                :src="getImage('product.svg')"
+                :src="getPublicImage('/public/img/product.svg')"
                 class="product__img"
                 width="56"
                 height="56"
@@ -203,7 +203,7 @@
 <script setup>
 import { ref, computed, watch, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { getImage, getPublicImage } from '@/common/helpers/index.js';
+import { getPublicImage } from '@/common/helpers/public-image.js';
 import AppCounter from '@/common/components/AppCounter.vue';
 import AppInput from '@/common/components/AppInput.vue';
 import { validateFields, clearValidationErrors } from '@/common/validator';

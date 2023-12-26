@@ -44,7 +44,7 @@
 
 <script setup>
 import { useAuthStore } from '@/stores';
-import { getPublicImage } from '@/common/helpers';
+import { getPublicImage } from '@/common/helpers/public-image.js';
 
 const authStore = useAuthStore();
 

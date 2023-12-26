@@ -12,9 +12,13 @@
           :draggable="values[ingredient.id] < MAX_INGREDIENT_COUNT"
           :data-transfer="ingredient"
         >
-          <span :class="`filling filling--${ingredient.value}`"
-            >{{ ingredient.name }}
-          </span>
+          <div class="filling">
+            <img
+              :src="getPublicImage(ingredient.image)"
+              :alt="ingredient.name"
+            />
+            {{ ingredient.name }}
+          </div>
 
           <app-counter
             class="ingredients__counter"
@@ -32,6 +36,7 @@
 <script setup>
 import AppDrag from '@/common/components/AppDrag.vue';
 import AppCounter from '@/common/components/AppCounter.vue';
+import { getPublicImage } from '@/common/helpers/public-image.js';
 import { toRef } from 'vue';
 import { MAX_INGREDIENT_COUNT } from '@/common/constants';
 
@@ -46,26 +51,12 @@ const props = defineProps({
   },
 });
 
-// вид непустого объекта values:
-// {
-//    'mushrooms': 1, // 1 гриб
-//    'tomato': 3, // 3 помидорки
-// }
-
 const emit = defineEmits(['update']);
 const values = toRef(props, 'values');
 
 const setValue = (ingredient, count) => {
   emit('update', ingredient, Number(count));
 };
-
-// const decrementValue = (ingredient) => {
-//   setValue(ingredient, getValue(ingredient) - 1);
-// };
-
-// const incrementValue = (ingredient) => {
-//   setValue(ingredient, getValue(ingredient) + 1);
-// };
 
 const inputValue = (ingredient, count) => {
   return setValue(ingredient, Math.min(MAX_INGREDIENT_COUNT, Number(count)));

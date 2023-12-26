@@ -133,7 +133,7 @@ export const useCartStore = defineStore('cart', {
     async createOrder() {
       const authStore = useAuthStore();
       const order = {
-        userId: authStore.user?.id,
+        userId: authStore.user?.id ?? null,
         phone: this.phone,
         pizzas: [...this.pizzas],
         misc: [...this.misc],

@@ -139,7 +139,7 @@ import { ref, computed, watch } from 'vue';
 import AppInput from '@/common/components/AppInput.vue';
 import { validateFields, clearValidationErrors } from '@/common/validator';
 import { useAuthStore, useProfileStore } from '@/stores';
-import { getPublicImage } from '@/common/helpers/index.js';
+import { getPublicImage } from '@/common/helpers/public-image.js';
 
 const authStore = useAuthStore();
 const profileStore = useProfileStore();
