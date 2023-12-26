@@ -4,58 +4,6 @@ import resources from '@/services/resources';
 import { pizzaPrice } from '@/common/helpers/pizza-price';
 import router from '../router';
 
-const getPizzasExtended = (pizza) => {
-  const { doughs, sauces, sizes } = useDataStore();
-  return {
-    dough: doughs.find((i) => i.id === pizza.doughId).name.toLowerCase(),
-    ingredients: pizza.ingredients.map(getPizzaIngredients).join(', '),
-    sauce: sauces.find((i) => i.id === pizza.sauceId)?.name.toLowerCase(),
-    size: sizes.find((i) => i.id === pizza.sizeId)?.name.toLowerCase(),
-    name: pizza.name,
-    quantity: pizza.quantity,
-    price: pizzaPrice(pizza),
-  };
-};
-
-const getPizzaIngredients = (pizzaIngredient) => {
-  const { ingredients } = useDataStore();
-  return ingredients
-    .find((i) => i.id === pizzaIngredient.ingredientId)
-    .name.toLowerCase();
-};
-
-const getMiscExtended = (orderMisc) => {
-  const dataMisc = useDataStore().misc.find((i) => i.id === orderMisc.miscId);
-  const { name, image, price } = dataMisc;
-  const { quantity, id } = orderMisc;
-  return {
-    name,
-    image,
-    price,
-    quantity,
-    id,
-  };
-};
-
-const getOrderTotal = (order) => {
-  const dataMisc = useDataStore().misc;
-
-  const pizzaPrices =
-    order.orderPizzas
-      ?.map((item) => item.quantity * pizzaPrice(item))
-      .reduce((acc, val) => acc + val, 0) || 0;
-
-  const miscPrices =
-    order.orderMisc
-      ?.map(
-        (item) =>
-          item.quantity * dataMisc.find((i) => i.id === item.miscId).price
-      )
-      .reduce((acc, val) => acc + val, 0) || 0;
-
-  return pizzaPrices + miscPrices;
-};
-
 export const useProfileStore = defineStore('profile', {
   state: () => ({
     addresses: [],
@@ -63,29 +11,70 @@ export const useProfileStore = defineStore('profile', {
   }),
   getters: {
     ordersExtended: (state) => {
-      const orderAddress = ({ addressId, orderAddress }) => {
-        if (orderAddress?.name) {
-          return orderAddress.name;
-        }
-        if (addressId) {
+      const { doughs, sauces, sizes, ingredients, misc } = useDataStore();
+
+      return state.orders.map((order) => {
+        const pizzaIngredients = (pizzaIngredient) => {
+          return ingredients
+            .find((i) => i.id === pizzaIngredient.ingredientId)
+            .name.toLowerCase();
+        };
+
+        const orderPizzas = order.orderPizzas?.map((pizza) => ({
+          dough: doughs.find((i) => i.id === pizza.doughId).name?.toLowerCase(),
+          ingredients: pizza.ingredients.map(pizzaIngredients).join(', '),
+          sauce: sauces.find((i) => i.id === pizza.sauceId).name?.toLowerCase(),
+          size: sizes.find((i) => i.id === pizza.sizeId).name,
+          name: pizza.name,
+          quantity: pizza.quantity,
+          price: pizzaPrice(pizza),
+        }));
+
+        const orderMisc =
+          order.orderMisc?.map((miscItem) => ({
+            ...misc.find((item) => item.id === miscItem.miscId),
+            quantity: miscItem.quantity,
+          })) ?? [];
+
+        const pizzaPrices =
+          order.orderPizzas
+            ?.map((item) => item.quantity * pizzaPrice(item))
+            .reduce((acc, val) => acc + val, 0) ?? 0;
+
+        const miscPrices =
+          order.orderMisc
+            ?.map(
+              (item) =>
+                item.quantity * misc.find((i) => i.id === item.miscId).price
+            )
+            .reduce((acc, val) => acc + val, 0) ?? 0;
+
+        const orderAddressText = () => {
+          const { addressId, orderAddress } = order;
+
+          if (orderAddress?.name) {
+            return orderAddress.name;
+          }
+
           const address = state.addresses.find(
             (address) => address.id === addressId
           );
-          if (address?.name) {
+
+          if (addressId && address?.name) {
             return address.name;
           }
-          return 'самовывоз';
-        }
-        return 'самовывоз';
-      };
 
-      return state.orders.map((order) => ({
-        ...order,
-        orderPizzas: order.orderPizzas?.map(getPizzasExtended),
-        orderMisc: order.orderMisc?.map(getMiscExtended),
-        orderTotal: getOrderTotal(order),
-        orderAddress: orderAddress(order),
-      }));
+          return 'самовывоз';
+        };
+
+        return {
+          ...order,
+          orderPizzas,
+          orderMisc,
+          orderTotal: pizzaPrices + miscPrices,
+          orderAddress: orderAddressText(),
+        };
+      });
     },
     addressExtended: (state) => {
       const fullAddress = ({ street, building, flat }) => {
@@ -124,7 +113,7 @@ export const useProfileStore = defineStore('profile', {
     async addAddress(address) {
       const res = await resources.address.addAddress(address);
       if (res.__state === 'success') {
-        this.addresses = [...this.addresses, res.data];
+        this.addresses.push(res.data);
         return 'success';
       }
       return res.data.message;
@@ -132,17 +121,18 @@ export const useProfileStore = defineStore('profile', {
     async updateAddress(address) {
       const res = await resources.address.updateAddress(address);
       if (res.__state === 'success') {
-        const index = this.addresses.findIndex(({ id }) => id === address.id);
-        if (~index) {
-          this.addresses.splice(index, 1, address);
-        }
+        this.addresses = this.addresses.map((i) =>
+          i.id === address.id ? address : i
+        );
         return 'success';
       }
     },
-    async removeAddress(id) {
-      const res = await resources.address.removeAddress(id);
+    async removeAddress(addressId) {
+      const res = await resources.address.removeAddress(addressId);
       if (res.__state === 'success') {
-        this.addresses = this.addresses.filter((address) => address.id !== id);
+        this.addresses = this.addresses.filter(
+          (address) => address.id !== addressId
+        );
       }
     },
     async getOrders() {
@@ -152,9 +142,11 @@ export const useProfileStore = defineStore('profile', {
         this.setOrders(res.data);
       }
     },
-    async removeOrder(id) {
-      await resources.order.removeOrder(id);
-      this.orders = this.orders.filter((order) => order.id !== id);
+    async removeOrder(orderId) {
+      const res = await resources.order.removeOrder(orderId);
+      if (res.__state === 'success') {
+        this.orders = this.orders.filter((order) => order.id !== orderId);
+      }
     },
   },
 });

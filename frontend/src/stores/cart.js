@@ -116,7 +116,6 @@ export const useCartStore = defineStore('cart', {
     setAddress(address) {
       const { id, street, building, flat, comment } = address;
       this.address = { id, street, building, flat, comment };
-      console.log(this.address);
     },
     setStreet(street) {
       this.address.street = street;
