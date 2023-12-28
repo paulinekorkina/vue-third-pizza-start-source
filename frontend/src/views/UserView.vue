@@ -17,7 +17,6 @@
       </router-link>
     </template>
 
-    <!--  Здесь будут располагаться компоненты дочерних маршрутов  -->
     <router-view />
   </sidebar-layout>
 </template>

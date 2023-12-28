@@ -143,11 +143,7 @@ export const useCartStore = defineStore('cart', {
       const res = await resources.order.createOrder(order);
       const profileStore = useProfileStore();
       if (res.__state === 'success') {
-        profileStore.getOrders(); // TODO: костыль
-        // profileStore.orders = [
-        //   ...profileStore.orders,
-        //   { ...order, ...res.data },
-        // ];
+        profileStore.getOrders();
         this.pizzas = [];
         this.misc = [];
         this.address = {

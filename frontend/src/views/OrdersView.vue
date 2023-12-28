@@ -5,98 +5,101 @@
 
   <div v-if="profileStore.ordersExtended.length === 0">Заказов пока нет.</div>
 
-  <section
-    v-for="order in profileStore.ordersExtended"
-    :key="order.id"
-    class="sheet order"
-  >
-    <div class="order__wrapper">
-      <div class="order__number">
-        <b>Заказ #{{ order.id }}</b>
-      </div>
-
-      <div class="order__sum">
-        <span>Сумма заказа: {{ order.orderTotal.toLocaleString() }} ₽</span>
-      </div>
-
-      <div class="order__button">
-        <button
-          type="button"
-          class="button button--border"
-          @click="profileStore.removeOrder(order.id)"
-        >
-          Удалить
-        </button>
-      </div>
-      <div class="order__button">
-        <button
-          type="button"
-          class="button"
-          @click="profileStore.repeatOrder(order.id)"
-        >
-          Повторить
-        </button>
-      </div>
-    </div>
-
-    <ul class="order__list">
-      <li
-        v-for="pizza in order.orderPizzas"
-        :key="pizza.id"
-        class="order__item"
-      >
-        <div class="product">
-          <img
-            :src="getPublicImage('/public/img/product.svg')"
-            class="product__img"
-            width="56"
-            height="56"
-            :alt="pizza.name"
-          />
-          <div class="product__text">
-            <h2>{{ pizza.name }}</h2>
-            <ul>
-              <li>{{ pizza.size }}, {{ pizza.dough }} тесто</li>
-              <li>Соус: {{ pizza.sauce }}</li>
-              <li>Начинка: {{ pizza.ingredients }}</li>
-            </ul>
-          </div>
+  <div v-if="dataStore.isDataLoaded">
+    <section
+      v-for="order in profileStore.ordersExtended"
+      :key="order.id"
+      class="sheet order"
+    >
+      <div class="order__wrapper">
+        <div class="order__number">
+          <b>Заказ #{{ order.id }}</b>
         </div>
 
-        <p class="order__price">
-          <span v-if="pizza.quantity > 1">{{ pizza.quantity }}х</span
-          >{{ pizza.price.toLocaleString() }} ₽
-        </p>
-      </li>
-    </ul>
+        <div class="order__sum">
+          <span>Сумма заказа: {{ order.orderTotal.toLocaleString() }} ₽</span>
+        </div>
 
-    <ul v-if="order.orderMisc" class="order__additional">
-      <li v-for="misc in order.orderMisc" :key="misc.id">
-        <img
-          :src="getPublicImage(misc.image)"
-          width="20"
-          height="30"
-          :alt="misc.name"
-        />
-        <p>
-          <span>{{ misc.name }}</span>
-          <b
-            ><span v-if="misc.quantity > 1">{{ misc.quantity }}х</span
-            >{{ misc.price }} ₽</b
+        <div class="order__button">
+          <button
+            type="button"
+            class="button button--border"
+            @click="profileStore.removeOrder(order.id)"
           >
-        </p>
-      </li>
-    </ul>
+            Удалить
+          </button>
+        </div>
+        <div class="order__button">
+          <button
+            type="button"
+            class="button"
+            @click="profileStore.repeatOrder(order.id)"
+          >
+            Повторить
+          </button>
+        </div>
+      </div>
 
-    <p class="order__address">Адрес доставки: {{ order.orderAddress }}</p>
-  </section>
+      <ul class="order__list">
+        <li
+          v-for="pizza in order.orderPizzas"
+          :key="pizza.id"
+          class="order__item"
+        >
+          <div class="product">
+            <img
+              :src="getPublicImage('/public/img/product.svg')"
+              class="product__img"
+              width="56"
+              height="56"
+              :alt="pizza.name"
+            />
+            <div class="product__text">
+              <h2>{{ pizza.name }}</h2>
+              <ul>
+                <li>{{ pizza.size }}, {{ pizza.dough }} тесто</li>
+                <li>Соус: {{ pizza.sauce }}</li>
+                <li>Начинка: {{ pizza.ingredients }}</li>
+              </ul>
+            </div>
+          </div>
+
+          <p class="order__price">
+            <span v-if="pizza.quantity > 1">{{ pizza.quantity }}х</span
+            >{{ pizza.price.toLocaleString() }} ₽
+          </p>
+        </li>
+      </ul>
+
+      <ul v-if="order.orderMisc" class="order__additional">
+        <li v-for="misc in order.orderMisc" :key="misc.id">
+          <img
+            :src="getPublicImage(misc.image)"
+            width="20"
+            height="30"
+            :alt="misc.name"
+          />
+          <p>
+            <span>{{ misc.name }}</span>
+            <b
+              ><span v-if="misc.quantity > 1">{{ misc.quantity }}х</span
+              >{{ misc.price }} ₽</b
+            >
+          </p>
+        </li>
+      </ul>
+
+      <p class="order__address">Адрес доставки: {{ order.orderAddress }}</p>
+    </section>
+  </div>
 </template>
 
 <script setup>
 import { getPublicImage } from '@/common/helpers/public-image.js';
-import { useProfileStore } from '@/stores';
+import { useProfileStore, useDataStore } from '@/stores';
 
 const profileStore = useProfileStore();
+const dataStore = useDataStore();
 </script>
 
 <style lang="scss" scoped>

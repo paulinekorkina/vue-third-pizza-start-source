@@ -14,7 +14,6 @@
             v-model="email"
             type="email"
             name="email"
-            class="input"
             placeholder="example@mail.ru"
             :error-text="validations.email.error"
           />
@@ -28,7 +27,6 @@
             v-model="password"
             type="password"
             name="password"
-            class="input"
             placeholder="Пароль"
             :error-text="validations.password.error"
           />

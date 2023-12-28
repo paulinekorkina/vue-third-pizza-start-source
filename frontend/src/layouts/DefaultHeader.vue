@@ -14,7 +14,7 @@
       <router-link :to="{ name: 'cart' }">0 ₽</router-link>
     </div>
     <div class="header__user">
-      <router-link v-if="authStore.user" :to="{ name: 'profile' }">
+      <router-link v-if="authStore.isAuthenticated" :to="{ name: 'profile' }">
         <img
           :src="getPublicImage(authStore.user.avatar)"
           :srcset="getPublicImage(authStore.user.avatar)"

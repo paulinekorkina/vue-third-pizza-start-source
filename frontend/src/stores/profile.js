@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia';
-import { useDataStore, useCartStore } from '@/stores';
-import resources from '@/services/resources';
+import { useDataStore, useCartStore, useAuthStore } from '@/stores';
 import { pizzaPrice } from '@/common/helpers/pizza-price';
-import router from '../router';
+import resources from '@/services/resources';
+import router from '@/router';
 
 export const useProfileStore = defineStore('profile', {
   state: () => ({
@@ -97,21 +97,26 @@ export const useProfileStore = defineStore('profile', {
       const order = this.orders.find((item) => item.id === id);
       const cartStore = useCartStore();
 
-      console.log(order);
-
       order.orderPizzas.forEach((pizza) => {
         cartStore.savePizza({ index: null, ...pizza });
       });
 
       order.orderMisc.forEach(({ miscId, quantity }) => {
-        console.log(miscId, quantity);
         cartStore.setMiscQuantity(miscId, quantity);
       });
 
       router.push({ name: 'cart' });
     },
     async addAddress(address) {
-      const res = await resources.address.addAddress(address);
+      const authStore = useAuthStore();
+      if (!authStore.isAuthenticated) {
+        return;
+      }
+
+      const res = await resources.address.addAddress({
+        ...address,
+        userId: authStore.user.id,
+      });
       if (res.__state === 'success') {
         this.addresses.push(res.data);
         return 'success';
@@ -119,6 +124,7 @@ export const useProfileStore = defineStore('profile', {
       return res.data.message;
     },
     async updateAddress(address) {
+      delete address.fullAddress;
       const res = await resources.address.updateAddress(address);
       if (res.__state === 'success') {
         this.addresses = this.addresses.map((i) =>
@@ -136,7 +142,6 @@ export const useProfileStore = defineStore('profile', {
       }
     },
     async getOrders() {
-      // TODO: костыль
       const res = await resources.order.getOrders();
       if (res.__state === 'success') {
         this.setOrders(res.data);
