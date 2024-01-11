@@ -3,12 +3,14 @@
     <div class="content__constructor">
       <div :class="`pizza pizza--foundation--${dough}-${sauce}`">
         <div class="pizza__wrapper">
-          <div
-            v-for="ingredient in filling"
-            :key="ingredient.id"
-            class="pizza__filling"
-            :class="getClassesList(ingredient)"
-          ></div>
+          <transition-group name="scale">
+            <div
+              v-for="ingredient in filling"
+              :key="ingredient.id"
+              class="pizza__filling"
+              :class="getClassesList(ingredient)"
+            ></div>
+          </transition-group>
         </div>
       </div>
     </div>
